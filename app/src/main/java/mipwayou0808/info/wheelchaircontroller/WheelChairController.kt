@@ -8,8 +8,6 @@ import java.util.*
  */
 class WheelChairController(context: Context) {
 
-    fun sendCommand(type: WheelChairCommandType){}//TODO implement
-
     fun getTargetDevice(): String {
         return "AA:BB:CC:DD:FF"//TODO replace actually using
     }

@@ -41,11 +41,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cvtest)
 
-        forwardButton.setOnClickListener { controller.sendCommand(WheelChairCommandType.FORWARD) }
-        leftButton.setOnClickListener { controller.sendCommand(WheelChairCommandType.LEFT) }
-        backButton.setOnClickListener { controller.sendCommand(WheelChairCommandType.BACK) }
-        rightButton.setOnClickListener { controller.sendCommand(WheelChairCommandType.RIGHT) }
-        stopButton.setOnClickListener { controller.sendCommand(WheelChairCommandType.STOP) }
+        forwardButton.setOnClickListener { sendCommand(WheelChairCommandType.FORWARD) }
+        leftButton.setOnClickListener { sendCommand(WheelChairCommandType.LEFT) }
+        backButton.setOnClickListener { sendCommand(WheelChairCommandType.BACK) }
+        rightButton.setOnClickListener { sendCommand(WheelChairCommandType.RIGHT) }
+        stopButton.setOnClickListener { sendCommand(WheelChairCommandType.STOP) }
 
         bluetoothConnection = bleClient.observeStateChanges().switchMap<RxBleConnection>({ state: RxBleClient.State ->
             when(state){
@@ -75,6 +75,30 @@ class MainActivity : AppCompatActivity() {
         } ).subscribe(
                 {connection ->
                     connection.setupNotification(controller.getTargetUUID())
+                            .flatMap({notificationObservable -> notificationObservable})
+                            .subscribe(
+                                {value ->
+                                when(getTypefromInt(Integer.parseInt(String(value)))){
+                                    WheelChairCommandType.STOP -> {
+                                        statusText.text = getString(R.string.label_button_stop)
+                                    }
+                                    WheelChairCommandType.FORWARD -> {
+                                        statusText.text = getString(R.string.label_button_forward)
+                                    }
+                                    WheelChairCommandType.BACK -> {
+                                        statusText.text = getString(R.string.label_button_back)
+                                    }
+                                    WheelChairCommandType.LEFT -> {
+                                        statusText.text = getString(R.string.label_button_left)
+                                    }
+                                    WheelChairCommandType.RIGHT -> {
+                                        statusText.text = getString(R.string.label_button_right)
+                                    }
+                                    else -> {
+                                        statusText.text = ""
+                                    }
+                                }
+                            })
                 },
                 {throwable ->
                     throwable.printStackTrace()
@@ -87,6 +111,10 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         bluetoothConnection.dispose()
     }
+
+    fun sendCommand(type: WheelChairCommandType){
+        bleDevice.observeConnectionStateChanges()
+    }//TODO implement
 
     private fun initBle(): BluetoothAdapter{
         //check location permission required by BLE

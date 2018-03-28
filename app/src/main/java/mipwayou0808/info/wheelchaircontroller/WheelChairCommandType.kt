@@ -10,3 +10,16 @@ enum class WheelChairCommandType(payload: Byte) {
     BACK(3),
     RIGHT(4)
 }
+    fun getTypefromInt(int: Int):WheelChairCommandType{
+        return when(int){
+            0 -> {
+                WheelChairCommandType.STOP
+            }
+            1 -> {
+                WheelChairCommandType.FORWARD
+            }
+            else -> {
+                WheelChairCommandType.STOP
+            }
+        }
+    }
