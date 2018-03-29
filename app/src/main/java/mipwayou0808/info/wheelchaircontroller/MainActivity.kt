@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
     private val deviceData = WheelChairDevice()
     private val bleClient: RxBleClient by lazy { RxBleClient.create(applicationContext) }
     private val bleDevice: RxBleDevice by lazy { bleClient.getBleDevice(deviceData.macAddress) }
-    private lateinit var bluetoothConnections: List<Disposable>
+    private var bluetoothConnections = emptyList<Disposable>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
