@@ -20,6 +20,7 @@ import com.polidea.rxandroidble2.RxBleDevice
 import io.reactivex.disposables.Disposable
 import kotterknife.bindView
 
+@Suppress("UNUSED_ANONYMOUS_PARAMETER")
 class MainActivity : AppCompatActivity() {
     private val LOCATION_SERVICE_REQUESTER = 256
     private val BLUETOOTH_SWITCH_REQUESTER = 512
@@ -29,14 +30,14 @@ class MainActivity : AppCompatActivity() {
     private val backButton: Button by bindView(R.id.button_back)
     private val rightButton: Button by bindView(R.id.button_right)
     private val stopButton: Button by bindView(R.id.button_stop)
-    val statusText: TextView by bindView(R.id.label_status)
+    private val statusText: TextView by bindView(R.id.label_status)
 
 //    private val mBluetoothAdapter: BluetoothAdapter by lazy { initBle() }
 
-    private val controller = WheelChairController(applicationContext)
+    private val deviceData = WheelChairDevice()
     private val bleClient: RxBleClient by lazy { RxBleClient.create(applicationContext) }
-    private val bleDevice: RxBleDevice by lazy { bleClient.getBleDevice(controller.getTargetDevice()) }
-    private lateinit var bluetoothConnection: Disposable
+    private val bleDevice: RxBleDevice by lazy { bleClient.getBleDevice(deviceData.macAddress) }
+    private lateinit var bluetoothConnections: List<Disposable>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         rightButton.setOnClickListener { sendCommand(WheelChairCommandType.RIGHT) }
         stopButton.setOnClickListener { sendCommand(WheelChairCommandType.STOP) }
 
-        bluetoothConnection = bleClient.observeStateChanges().switchMap<RxBleConnection>({ state: RxBleClient.State ->
+        bluetoothConnections += bleClient.observeStateChanges().switchMap<RxBleConnection>({ state: RxBleClient.State ->
             when(state){
                 RxBleClient.State.READY -> {
                     bleDevice.establishConnection(true)
@@ -75,7 +76,7 @@ class MainActivity : AppCompatActivity() {
             }
         } ).subscribe(
                 {connection ->
-                    connection.setupNotification(controller.getTargetUUID())
+                    connection.setupNotification(deviceData.notificationUUID)
                             .flatMap({notificationObservable -> notificationObservable})
                             .subscribe(
                                 {value ->
@@ -95,9 +96,6 @@ class MainActivity : AppCompatActivity() {
                                     WheelChairCommandType.RIGHT -> {
                                         statusText.text = getString(R.string.label_button_right)
                                     }
-                                    else -> {
-                                        statusText.text = ""
-                                    }
                                 }
                             })
                 },
@@ -110,13 +108,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        bluetoothConnection.dispose()
+        bluetoothConnections.forEach{conn -> conn.dispose()}
     }
 
     private fun sendCommand(type: WheelChairCommandType){
-        bleDevice.establishConnection(true)
+        bluetoothConnections += bleDevice.establishConnection(true)
                 .flatMapSingle({connection ->
-                    connection.writeCharacteristic(controller.getTargetUUID(), byteArrayOf(type.payload))
+                    connection.writeCharacteristic(deviceData.writeUUID, byteArrayOf(type.payload))
                     })
                 .subscribe(
                         {characteristicValue ->
