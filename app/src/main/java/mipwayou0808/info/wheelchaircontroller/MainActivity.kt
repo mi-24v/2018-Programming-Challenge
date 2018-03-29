@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -78,7 +79,7 @@ class MainActivity : AppCompatActivity() {
                             .flatMap({notificationObservable -> notificationObservable})
                             .subscribe(
                                 {value ->
-                                when(getTypefromInt(Integer.parseInt(String(value)))){
+                                when(getCommandTypeFromInt(Integer.parseInt(String(value)))){
                                     WheelChairCommandType.STOP -> {
                                         statusText.text = getString(R.string.label_button_stop)
                                     }
@@ -112,9 +113,20 @@ class MainActivity : AppCompatActivity() {
         bluetoothConnection.dispose()
     }
 
-    fun sendCommand(type: WheelChairCommandType){
-        bleDevice.observeConnectionStateChanges()
-    }//TODO implement
+    private fun sendCommand(type: WheelChairCommandType){
+        bleDevice.establishConnection(true)
+                .flatMapSingle({connection ->
+                    connection.writeCharacteristic(controller.getTargetUUID(), byteArrayOf(type.payload))
+                    })
+                .subscribe(
+                        {characteristicValue ->
+                            Log.i(this.packageName, "sent value: $characteristicValue")
+                        },
+                        {throwable ->
+                            throwable.printStackTrace()
+                        }
+                )
+    }
 
     private fun initBle(): BluetoothAdapter{
         //check location permission required by BLE

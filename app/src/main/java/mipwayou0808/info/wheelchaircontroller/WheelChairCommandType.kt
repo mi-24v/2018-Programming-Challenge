@@ -3,14 +3,34 @@ package mipwayou0808.info.wheelchaircontroller
 /**
  * Command type definition
  */
-enum class WheelChairCommandType(payload: Byte) {
+enum class WheelChairCommandType(val payload: Byte) {
     STOP(0),
     FORWARD(1),
     LEFT(2),
     BACK(3),
-    RIGHT(4)
+    RIGHT(4);
+
+    override fun toString(): String {
+        return when(this){
+            STOP -> {
+                "STOP command"
+            }
+            FORWARD -> {
+                "FORWARD command"
+            }
+            LEFT -> {
+                "LEFT command"
+            }
+            BACK -> {
+                "BACK command"
+            }
+            RIGHT -> {
+                "RIGHT command"
+            }
+        }
+    }
 }
-    fun getTypefromInt(int: Int):WheelChairCommandType{
+    fun getCommandTypeFromInt(int: Int):WheelChairCommandType{
         return when(int){
             0 -> {
                 WheelChairCommandType.STOP
