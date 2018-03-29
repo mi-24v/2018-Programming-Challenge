@@ -18,6 +18,15 @@ enum class WheelChairCommandType(payload: Byte) {
             1 -> {
                 WheelChairCommandType.FORWARD
             }
+            2 -> {
+                WheelChairCommandType.LEFT
+            }
+            3 -> {
+                WheelChairCommandType.BACK
+            }
+            4 -> {
+                WheelChairCommandType.RIGHT
+            }
             else -> {
                 WheelChairCommandType.STOP
             }
