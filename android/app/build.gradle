@@ -23,13 +23,19 @@ android {
     buildToolsVersion '26.0.2'
 }
 
+def retrofit_version = '2.4.0'
+
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     implementation 'com.android.support:appcompat-v7:26.0.2'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.jakewharton:kotterknife:0.1.0-SNAPSHOT'
-    compile 'com.polidea.rxandroidble2:rxandroidble:1.5.0'
+    compile "com.squareup.retrofit2:retrofit:${retrofit_version}"
+    // CallAdapter for RxJava
+    compile "com.squareup.retrofit2:adapter-rxjava2:${retrofit_version}"
+    // GSON converter
+    compile "com.squareup.retrofit2:converter-gson:${retrofit_version}"
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
     // Because RxAndroid releases are few and far between, it is recommended you also
     // explicitly depend on RxJava's latest version for bug fixes and new features.
